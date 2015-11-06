@@ -4,6 +4,5 @@
 (defsystem #:parenscript-react
   :serial t
   :components ((:file "package")
-               (:file "parenscript-react")
-               (:file "example"))
+               (:file "parenscript-react"))
   :depends-on (#:parenscript))

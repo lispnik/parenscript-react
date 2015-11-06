@@ -17,45 +17,24 @@
 (defpsmacro is-valid-element (object)
   `(React.isValidElement ,object))
 
-(defpsmacro defcomponent (name mixins methods &body body)
-  `(psetq ,name
+(defpsmacro defcomponent (name mixins methods)
+  `(defvar ,name
           (React.createClass
-           (create 'display-name ',name
+           (create displayName ',name
+                   mixins (list ,@mixins)
                    ,@(mapcan #'(lambda (method)
                                  (destructuring-bind (name args &body body) method
                                    (list name `(lambda ,args ,@body))))
                              methods)))))
 
-(ps
- (progn
-   (psetq SetIntervalMixin
-          (create 'willComponentMount
-                  (lambda ()
-                    (setf (@ this intervals) '()))
+(in-package #:parenscript-react-dom)
 
-                  'setInterval
-                  (lambda (&rest intervals)
-                    (setf (@ this intervals) (ps:mapcar 'set-interval intervals))) ;; FIXME
+(defpsmacro render (element container &optional callback)
+  `(ReactDOM.render ,element ,container ,callback))
 
-                  'componentWillUnmount
-                  (lambda () (map clear-interval (@ this inntervals)))))
-   (defcomponent TockTock (SetIntervalMixin)
-     ((render ()
-              (create-element "p"
-                              (concatenate 'string "React has been doing this for "
-                                           (@ this state seconds) " seconds"))))
-     )))
+;; Not really part of React API:
 
-(ps* *ps-lisp-library*)
-(ps
-
-
-
- (defcomponent *Foo ()
-   ((render (foo bar baz)
-            (+ 1 2))
-
-    (component-did-mount ()
-                         (console.log "lol")))))
+(defpsmacro get-element-by-id (id)
+  `(document.getElementById ,id))
 
 #.(setf (readtable-case *readtable*) :upcase)
